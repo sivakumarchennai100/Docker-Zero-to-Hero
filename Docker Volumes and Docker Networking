@@ -1,0 +1,560 @@
+### DOCKER VOLUMES AND DOCKER NETWORKING ###
+
+Day-26 | Multi Stage Docker Builds | Reduce Image Size by 800 % | Distroless Container Images:
+----------------------------------------------------------------------------------------------------------------------------
+ 
+Multistage Docker Builds
+Distroless images
+Distroless images are very minimalistic images that will have hardly have very less packages, so the size of the image is drastically reduced.
+By using the Distroless images we can get he maximum efficiency or maximum benefits of multistage docker builds
+.
+.
+DISTROLESS IMAGES:
+-----------------
+ 
+https://github.com/GoogleContainerTools/distroless
+ 
+Example: https://git[hub.com/GoogleContainerTools/distroless/tree/main/]hub.com/GoogleContainerTools/distroless/tree/main/java 
+.
+.
+[.%0d.%0d.%0dWithout%20multistage%20docker%20builds%20,%20inorder%20execute%20a%20calcul].
+[.%0d.%0d.%0dWithout%20multistage%20docker%20builds%20,%20inorder%20execute%20a%20calcul].
+[.%0d.%0d.%0dWithout%20multistage%20docker%20builds%20,%20inorder%20execute%20a%20calcul].
+[.%0d.%0d.%0dWithout%20multistage%20docker%20builds%20,%20inorder%20execute%20a%20calcul]Without multistage docker builds , inorder execute a calculator application as a docker container for a python application
+###########################################
+# BASE IMAGE
+###########################################
+ 
+FROM ubuntu AS build   >>>> Base Image
+ 
+RUN apt-get update && apt-get install -y golang-go >>> Installing the dependendies, in thi case we are installing golang application
+ 
+ENV GO111MODULE=off
+ 
+COPY . .
+ 
+RUN CGO_ENABLED=0 go build -o /app .
+ 
+ENTRYPOINT ["/app"]
+.
+.
+The problem with the above Docker file is the size f the image created with the above docker file is huge.
+We need only the python/java/golang runtime to run the application
+With the above Docker file, we have the Ubuntu base image which has lot of dependendies, apt packages, apt repo, which creates a overload on the simple docker calculatr application, since we need only the python/java/golang runtime to run this application
+Inorder to avoid the above overload, docker introduced a concept called multistage docker builds.
+In   multistage docker builds , we split the docker file into two or multiple parts.
+###########################################
+# BASE IMAGE
+###########################################
+ 
+FROM ubuntu AS build
+ 
+RUN apt-get update && apt-get install -y golang-go
+ 
+ENV GO111MODULE=off
+ 
+COPY . .
+ 
+RUN CGO_ENABLED=0 go build -o /app .
+ 
+############################################
+# HERE STARTS THE MAGIC OF MULTI STAGE BUILD
+############################################
+ 
+FROM scratch
+ 
+# Copy the compiled binary from the build stage
+COPY --from=build /app /app
+ 
+# Set the entrypoint for the container to run the binary
+ENTRYPOINT ["/app"]
+.
+.
+Execution:
+Github repo:   https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main/examples[/golang-multi-stage-docker-build%0d%0d%0d%0dgit%20clone%20https:/github.com/iam-veeramalla/Docker-Zero-to-Hero/tree]/golang-multi-stage-docker-build
+[/golang-multi-stage-docker-build%0d%0d%0d%0dgit%20clone%20https:/github.com/iam-veeramalla/Docker-Zero-to-Hero/tree] 
+[/golang-multi-stage-docker-build%0d%0d%0d%0dgit%20clone%20https:/github.com/iam-veeramalla/Docker-Zero-to-Hero/tree] 
+[/golang-multi-stage-docker-build%0d%0d%0d%0dgit%20clone%20https:/github.com/iam-veeramalla/Docker-Zero-to-Hero/tree] 
+[/golang-multi-stage-docker-build%0d%0d%0d%0dgit%20clone%20https:/github.com/iam-veeramalla/Docker-Zero-to-Hero/tree]git clone https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main/examples[/golang-multi-stage-docker-build%0d%0dcd%20Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build%20&&%20ls%0d]/golang-multi-stage-docker-build
+[/golang-multi-stage-docker-build%0d%0dcd%20Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build%20&&%20ls%0d] 
+[/golang-multi-stage-docker-build%0d%0dcd%20Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build%20&&%20ls%0d]cd Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build && ls
+ 
+sudo yum install golang
+ 
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ go run calculator.go
+ 
+ 
+cd /home/ec2-user/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build/dockerfile-without-multistage
+[ec2-user@ip-172-31-83-217 dockerfile-without-multistage]$ docker build -t simplecalculator .
+[ec2-user@ip-172-31-83-217 dockerfile-without-multistage]$ docker images | head -5
+Building the image with multistage docker build:
+ 
+/home/ec2-user/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build/Dockerfile --> multistage docker build
+ 
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker build -t simplecalculator-multistage .
+ 
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker images | head -5
+Now the image created with multistage docker build size will be very minimal
+ 
+ 
+********************************************************************************************************************************************************
+ 
+Day-27 | Docker Volumes and Bind Mounts|Persistent Storage for Docker|
+-------------------------------------------------------------------------------------------------
+ 
+What is major problem in the container ?
+Problem1:
+For ex, if have installed a nginx application inside the container, the nginx application continuously puts the user information, like who is the login user, from which ip address the user is logged in, all of these details the ngnix tries to store the information in the log file. The log file is very important for your organisation to perform auditing.
+For example, when the container went down, the log file gets deleted because the containers are ephemeral in nature means they are very short lived.By default the containers don’t have a file system by default, because containers are very light weight in nature, the containers use the resources like CPU, storage and memory directly from the kernel of the host operating system.
+So when the container goes down, the resources fetched from the kernel OS gets killed, because of which the log file gets deleted.
+ 
+ 
+
+
+Problem2:
+ 
+Lets say, we have two containers frontend and backend containers. Backend container are serving the frontend container with json or html data . Lets assume when the backend container went down, then the files stored for the series of files will be lost in the container and will not be available and the application will be going completely wrong.
+ 
+ 
+ 
+Problem 3:
+ 
+Let say when an app installed inside the container is reading the file from the cron job and storing it in the host file system. The app container wants to read and display to the user. In this case the container cannot read the file stored from the host operating system.
+ 
+ 
+ 
+ 
+To solve the above problems docker has come up with the solution like
+Bind Mounts
+Volumes
+ 
+Bind Mounts allow you to bind the directories inside the containers. It will bind the folder on the container with the folder on the host OS.ie. for example, any files inside the /app folder on the host OS can be read by the container C1.Also allows you the write the information from the container to the host OS.
+Let say if the container C1 goes down, then the new container C2 is created automatically, then we can bind the container C2 with the same /app folder with container C2 to the host OS so that the information is not lost.
+Whenever the new container comes up, then the information is not lost or for some reason the container does not comes up, even then the user information is available in the /app folder of the host OS.
+This is called Bind Mounts in Docker.
+ 
+ 
+ 
+Vol
+Vol 
+ 
+Volumes also offer a kind of same solution with better life cycle.
+Using docker cli, we can create Volumes
+Volume is the logical partition creating on the host.
+Using docker cli, we can create/delete/modify ie take the volume from C1 and attach to C2 , attach the same volume to both C1 and C2.
+Using the voulume also we are attaching the specific folder or file system to the containers but the main advantage of volumes is we are not providing the directory details.
+Instead of saying attach the specific folder /app of the host OS to the C1, we are creating the volumes on the host OS which is basically the logicall partition of the host. ie., # df , docker will create a lgical vlume  and this volume will be mounted to the container.
+We are managing the entire volume things with the docker cli itself and it has the lifecycle ie., create/delete/modify etc.,
+One more advantage f creating the volumes is that it can be created on any external sources like host, EC2, S3, NFS etc., which will be helpful for taking the backup incase of any storage issue with the host OS
+Volume provides high performance when created with high performance and added t the containers.
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+While creating docker volumes better to go with – mount options because it is very verbose to users
+ 
+ 
+ 
+ 
+
+
+
+Practicals:
+Note, unless there is need, it is always good to go for Volumes.
+ 
+ 
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker volume create siva
+siva
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker volume ls
+DRIVER    VOLUME NAME
+local     siva
+ 
+Note now the logical partition is created on the local host, ie here Ec2.
+ 
+To understand the details of the volumes, then use the below command.
+ 
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker volume inspect siva
+[
+    {
+        "CreatedAt": "2024-09-04T05:58:31Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/siva/_data",
+        "Name": "siva",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$
+ 
+ 
+Delete:
+-----
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker volume rm siva
+siva
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker volume ls
+DRIVER    VOLUME NAME
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$
+ 
+ 
+ 
+Creating a container and mounting the volumes:
+---------------------------------------------
+ 
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker images | head -5
+REPOSITORY                          TAG       IMAGE ID       CREATED          SIZE
+simplecalculator-multistage         latest    7432c55f3f1c   24 minutes ago   1.96MB
+simplecalculator                    latest    2dfe4e10dee9   30 minutes ago   666MB
+skmohan7984/my-first-docker-image   latest    43a98e3721dc   5 hours ago      580MB
+hello-world                         latest    d2c94e258dcb   16 months ago    13.3kB
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$
+ 
+ 
+Note: If Entry point is there in the Docker file, will be difficult to understand
+ 
+[ec2-user@ip-172-31-83-217 ~]$ vim Dockerfile
+ 
+FROM ubuntu && wq!
+ 
+ 
+Using the git hub repo docker file for creating the docker container:
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ pwd
+/home/ec2-user/Docker-Zero-to-Hero/examples/first-docker-file
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker build -t volumedemo .
+>> Now the image is build
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker images | head -5
+REPOSITORY                          TAG       IMAGE ID       CREATED          SIZE
+simplecalculator-multistage         latest    7432c55f3f1c   30 minutes ago   1.96MB
+simplecalculator                    latest    2dfe4e10dee9   36 minutes ago   666MB
+skmohan7984/my-first-docker-image   latest    43a98e3721dc   5 hours ago      580MB
+volumedemo                          latest    43a98e3721dc   5 hours ago      580MB
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker volume create siva
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker volume ls
+DRIVER    VOLUME NAME
+local     siva
+local     siva1
+ 
+Mount the newly created volume and adding to the container:
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker run -d --mount source=siva,target=/app nginx:latest
+Unable to find image 'nginx:latest' locally
+latest: Pulling from library/nginx
+e4fff0779e6d: Pull complete
+2a0cb278fd9f: Pull complete
+7045d6c32ae2: Pull complete
+03de31afb035: Pull complete
+0f17be8dcff2: Pull complete
+14b7e5e8f394: Pull complete
+23fa5a7b99a6: Pull complete
+Digest: sha256:447a8665cc1dab95b1ca778e162215839ccbb9189104c79d7ec3a81e14577add
+Status: Downloaded newer image for nginx:latest
+a6f73cfb6b1116766a836b3f52748c697dd7212dbcb94eab65471a3b2679005a
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+a6f73cfb6b11   nginx:latest   "/docker-entrypoint.…"   58 seconds ago   Up 56 seconds   80/tcp    trusting_cohen
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker inspect a6f73cfb6b11
+>> Gives the full details of the container
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker volume rm siva
+Error response from daemon: remove siva: volume is in use - [a6f73cfb6b1116766a836b3f52748c697dd7212dbcb94eab65471a3b2679005a]
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+Note: Inorder to delete the volumes, we need to first stop the container and delete the container , then only we can delete the volumes
+ 
+D: How to check if the logs are available if we create a volume and then add to container is persistet.
+      >> the data will still be available in /app folder of the host OS
+ 
+ 
+********************************************************************************************************************************************************
+Day 28 – Docker Network:
+ 
+Why you need networking in docker and what is docker networking ?
+Basically networking allows communication between the container and to the hst system.
+There is 2 scenerias to be considered, 1. Both containers should communicate to each other
+2. One container should be restricted/isolated to communicate to another container for security reasons.
+By default any container should communicate to the host system b/c the resource are fetched form host system by the container.
+Container networking solution offers both the above solutions.
+ 
+Generally we have 2 types of networking in docker 1. Bridge networking, 2. Host Netwrking, 3. Overlay networking
+ 
+Generally the subnet of the container will be different from the subnet of the host machine.
+ 
+Inorder to solve this docker will have a virtual eth whenever a container is created which is basically docker 0
+ 
+Without the docker0 container cannot talk to the host machine.The above is called as Bridge networking which is the default network when the container is created.
+ 
+Even in Bridge networking, the network is not secure, because all of the container inside a host can talk to each other via docker0, which is insecure. Lets say we have a frontend and backednd container, then if these containers talk to each other, no issues.
+ 
+But if the dev container don’t want to communicate to finance container, then there should be a logical isolation between the containers.
+ 
+The above can be achieve by custom bridge networking
+ 
+ 
+ 
+The other networking docker have is Host netoworking, whenever a container is created, docker will directly bind your container with ip address f the host, so any container inside the host can talk to the host and no isolation is done since the subnet is same for the container and the host machine.
+ 
+Hos networking is a insecure way accessing the network with container and it is exposed to vulenerabilities.
+ 
+Overlay networking is formed when there needs a communications bw multiple hosts.
+ 
+ 
+ 
+ 
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+ 
+ 
+ 
+ 
+ 
+Practicals:
+ 
+Day 28: https://www.youtube.com/watch?v=xrUGEoUpa3s
+ 
+[ec2-user@ip-172-31-83-217[%20first-docker-file%5d$%20docker%20run%20-d%20--name%20l] first-docker-file]$ docker run -d --name login  nginx:latest
+40d050440f96285e502e60ba45a1003e42b212fc88526337fab58507589e492f
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker exec -it login /bin/bash
+root@40d050440f96:/#
+ 
+root@40d050440f96:/# apt update
+Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8787 kB]
+Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [13.8 kB]
+Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [179 kB]
+Fetched 9234 kB in 1s (8023 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+10 packages can be upgraded. Run 'apt list --upgradable' to see them.
+root@40d050440f96:/#
+ 
+ 
+Install PING :
+ 
+root@40d050440f96:/# apt-get install iputils-ping -y
+ 
+root@40d050440f96:/# ping -V
+ping from iputils 20221126
+libcap: yes, IDN: yes, NLS: no, error.h: yes, getrandom(): yes, __fpending(): yes
+root@40d050440f96:/#
+ 
+ 
+Creating another container:
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker run -d --name logout  nginx:latest
+b2e5d58d188b4758d6aef463db5613091467fc9b383209fd8d0c92e127fc15ac
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+b2e5d58d188b   nginx:latest   "/docker-entrypoint.…"   15 seconds ago   Up 14 seconds   80/tcp    logout "IPAddress": "172.17.0.4"
+40d050440f96   nginx:latest   "/docker-entrypoint.…"   5 minutes ago    Up 5 minutes    80/tcp    login "IPAddress": "172.17.0.3"
+a6f73cfb6b11   nginx:latest   "/docker-entrypoint.…"   46 minutes ago   Up 46 minutes   80/tcp    trusting_cohen
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker inspect login >>> we can get the ip address of the container
+ 
+ 
+Trying to ping logout container from login container:
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+b2e5d58d188b   nginx:latest   "/docker-entrypoint.…"   3 minutes ago    Up 3 minutes    80/tcp    logout
+40d050440f96   nginx:latest   "/docker-entrypoint.…"   8 minutes ago    Up 8 minutes    80/tcp    login
+a6f73cfb6b11   nginx:latest   "/docker-entrypoint.…"   49 minutes ago   Up 49 minutes   80/tcp    trusting_cohen
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docket exec -it 40d050440f96 /bin/bash
+-bash: docket: command not found
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker exec -it 40d050440f96 /bin/bash
+root@40d050440f96:/#
+root@40d050440f96:/# ping 172.17.0.4
+PING 172.17.0.4 (172.17.0.4) 56(84) bytes of data.
+64 bytes from 172.17.0.4: icmp_seq=1 ttl=127 time=0.070 ms
+64 bytes from 172.17.0.4: icmp_seq=2 ttl=127 time=0.061 ms
+64 bytes from 172.17.0.4: icmp_seq=3 ttl=127 time=0.055 ms
+^C
+--- 172.17.0.4 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2089ms
+rtt min/avg/max/mdev = 0.055/0.062/0.070/0.006 ms
+root@40d050440f96:/#
+ 
+ 
+To list all the network on the host:
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+838dd6228648   bridge    bridge    local
+ca515ee09846   host      host      local
+3f6cf8172960   none      null      local
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+ 
+To create and delete the network :
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker network create test
+4da438b54df8d6da289265650e280263d8d2c11670688c4b7de7c7eaecd65287
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+838dd6228648   bridge    bridge    local
+ca515ee09846   host      host      local
+3f6cf8172960   none      null      local
+4da438b54df8   test      bridge    local
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker network rm test
+test
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+838dd6228648   bridge    bridge    local
+ca515ee09846   host      host      local
+3f6cf8172960   none      null      local
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+ 
+ 
+-------------------------------------------------
+ 
+ 
+To create a finance container and assgin a secure network:
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker run -d --name finance --network=secure-network nginx:latest
+55d0b0136c3029f9c943f6677e889802d569d053d19578ce41ad568a4b649e30
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+55d0b0136c30   nginx:latest   "/docker-entrypoint.…"   18 seconds ago   Up 18 seconds   80/tcp    finance "IPAddress": "172.19.0.2"
+b2e5d58d188b   nginx:latest   "/docker-entrypoint.…"   10 minutes ago   Up 10 minutes   80/tcp    logout "IPAddress": "172.17.0.4"
+40d050440f96   nginx:latest   "/docker-entrypoint.…"   16 minutes ago   Up 16 minutes   80/tcp    login "IPAddress": "172.17.0.3"
+a6f73cfb6b11   nginx:latest   "/docker-entrypoint.…"   57 minutes ago   Up 57 minutes   80/tcp    trusting_cohen
+ 
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker inspect finance
+          "Networks": {
+                "secure-network": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "55d0b0136c30"
+                    ],
+                    "MacAddress": "02:42:ac:13:00:02",
+                    "NetworkID": "767bb579f7faef0f0f8d2a725219308ad82df56626bc20c03b7cd69fca13e80e",
+                    "EndpointID": "ba67b9f9de58c65d46793dd5fc183a3b3c0fdb8d48d84be0fde3b10dc76b2d4f",
+                    "Gateway": "172.19.0.1",
+                    "IPAddress": "172.19.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+ 
+ 
+ 
+ 
+Now when we try to ping the finance container from login container, will not ping, since we have made isolation via secure-network.
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker exec -it 40d050440f96 /bin/bash
+root@40d050440f96:/# ping 172.19.0.2
+PING 172.19.0.2 (172.19.0.2) 56(84) bytes of data.
+^C
+--- 172.19.0.2 ping statistics ---
+90 packets transmitted, 0 received, 100% packet loss, time 92571ms
+ 
+ 
+ 
+---------------------------------------------------------------
+ 
+Creating a host network and check:
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker run -d --name hostcont --network=host nginx:latest
+fca63172fab62e9fe5af63ccdc7dc151e8cff7fd47e9b5ec374de2fe212a87aa
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED              STATUS              PORTS     NAMES
+fca63172fab6   nginx:latest   "/docker-entrypoint.…"   About a minute ago   Up About a minute             hostcont
+55d0b0136c30   nginx:latest   "/docker-entrypoint.…"   6 minutes ago        Up 6 minutes        80/tcp    finance
+b2e5d58d188b   nginx:latest   "/docker-entrypoint.…"   17 minutes ago       Up 17 minutes       80/tcp    logout
+40d050440f96   nginx:latest   "/docker-entrypoint.…"   22 minutes ago       Up 22 minutes       80/tcp    login
+a6f73cfb6b11   nginx:latest   "/docker-entrypoint.…"   About an hour ago    Up About an hour    80/tcp    trusting_cohen
+[ec2-user@ip-172-31-83-217 first-docker-file]$
+ 
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker inspect hostcont
+           "Networks": {
+                "host": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "MacAddress": "",
+                    "NetworkID": "ca515ee098463faf8bafca0fabddae7dc237a69e1d560261b92eff0f10d89c1f",
+                    "EndpointID": "e5665bcd1fba9a72f9698ca430000560e8dcadd5b8ef68112223ee25167fd891",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DriverOpts": null,
+                    "DNSNames": null
+ 
+> No ip address b/c we can directly access the container from the host itself
+ 
+ 
+ 
+********************************************************************************************************************************************************
+ 
+ 
+Day-29 | Docker Interview Questions with Answers
+ 
+Day 29:  https://www.youtube.com/watch?v=I6ZBUEc4LrU&list=PLdpzxOOAlwvIKMhk8WhzN1pYoJ1YU8Csa&index=36
+ 
+ 
+ 
+********************************************************************************************************************************************************
+ 
+
