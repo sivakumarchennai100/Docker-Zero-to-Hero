@@ -1,0 +1,174 @@
+UNDERSTANDING THE FLOW OF DJANGO APPLICATION CODE:
+==================================================
+
+Dockerfile:
+----------
+ubuntu@ip-172-31-42-41:~/Docker-Zero-to-Hero/examples/python-web-app$ more Dockerfile
+FROM ubuntu
+
+WORKDIR /app
+
+COPY requirements.txt /app
+COPY devops /app
+
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt --break-system-packages && \
+    cd devops
+
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+
+*************************************************************************************************************************
+Day 24: Ubuntu Docker Installation: >>> Working one
+--------------------------------------------------
+
+Day 24 and 25: https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main:
+
+ubuntu@ip-172-31-18-50:~$ sudo apt update -y
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ sudo apt install docker.io -y
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ docker >> veriy for docker installation
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ sudo systemctl status docker
+
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ sudo systemctl start docker
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ sudo usermod -aG docker ubuntu
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ sudo service docker restart
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ docker run hello-world >> logout of Ec2 instance and login back
+
+ubuntu@ip-172-31-34-138:~$ git clone https://github.com/iam-veeramalla/Docker-Zero-to-Hero
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ docker build -t abhishekf5/my-first-docker-image:latest .
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker images
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker run -it abhishekf5/my-first-docker-image:latest
+
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker login (UN:skmohan7984 , pw:Kavitha@84)
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker tag abhishekf5/my-first-docker-image skmohan7984/my_image_v1
+ubuntu@ip-172-31-31-35:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker push skmohan7984/my_image_v1
+Verify in Docker hub: https://hub.docker.com/repositories/skmohan7984
+
+
+
+********************************************************************************************************************************************************
+
+
+Day 25: Deploy a Django application as a docker container:  -- Working one
+----------------------------------------------------------
+github: https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main
+
+
+Understanding Django : examples/python-web-app/devops/settings.py                   >> Here we have the configuration for the entire project under settings.py
+                   examples/python-web-app/devops/demo/views.py                     >> Here we have the python code which is executed for rendering the templates.
+                   examples/python-web-app/devops/demo/templates                    >> Folder for rendering the template
+                   examples/python-web-app/devops/demo/templates/demo_site.html     >> This is the content served for browser
+                       examples/python-web-app/devops/demo                          >> Here we have one micro services created for the devops project
+                   examples/python-web-app/devops/urls.py                           >> responsible for serving the content for the urls
+
+
+Flow of Django applications:
+
+1. Satrt with installing Django (Refer: https://www.youtube.com/watch?v=uJmjAIzNekI&list=PLyBiUX9SY9IuCaJtBMWE6jCJxpEgFBje-&index=6)
+      - check the default python version: ubuntu@ip-172-31-18-50:~$ python3
+      - Install pip : ubuntu@ip-172-31-18-50:~$ sudo apt install python3-pip  --> using the pip package, we can install django applications
+      - Install virtual env : ubuntu@ip-172-31-18-50:~$ sudo apt install python3-venv  and verify # pip list && python3 --version
+
+      - Now go the project folder >> ubuntu@ip-172-31-18-50:~$ cd Docker-Zero-to-Hero/examples/python-web-app/devops/
+                              ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ python3 -m venv demo_env
+                              ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ ls
+                              db.sqlite3  demo  demo_env  devops  manage.py
+                              ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ ls demo_env/bin/
+                              Activate.ps1  activate  activate.csh  activate.fish  pip  pip3  pip3.12  python  python3  python3.12
+                              ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ source demo_env/bin/activate
+                              (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$
+      - Install Django: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ pip3 install django
+      - Start the django project using django-admin: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ django-admin startproject devops
+                                                     (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops/devops$ django-admin startapp demo
+      - Goto settings.py and enter the host ip in ALLOWED_HOSTS ['*']
+      - Now run the application : First add the port number 8000 and allowed host in AWS security group of the instance created.
+                            (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ python manage.py runserver 0.0.0.0:8000  > Now the port will open and run the application inside the container
+
+      - Verify the applications: http://34.201.143.16:8000/demo/
+
+      - To containerise the application: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app$ docker build .
+      -                                  ubuntu@ip-172-31-43-42:~/Docker-Zero-to-Hero/examples/python-web-app$ docker run -p 8000:8000 -it c5fd646effea
+
+>>> Not working after this before
+
+DOCKER FILE:
+
+FROM ubuntu
+WORKDIR /app
+COPY requirements.txt /app
+COPY devops /app
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt && \
+    pip install --break-system-packages && \
+    cd devops
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+EXPOSE 8000
+
+
+>>> After adding break-fix:
+
+FROM ubuntu
+
+WORKDIR /app
+
+COPY requirements.txt /app
+COPY devops /app
+
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt --break-system-packages && \
+    cd devops
+
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+
+
+
+-----------------------
+
+If you get no space available:
+
+Docker commands: docker image ls -a  --> to see if you have hide images.
+
+docker rmi -f $(docker image ls -a -q) -->to remove all of them you can use this command :
+
+docker system prune --> You will need delete all containers that were stopped as well as all volumes and networks and that are not used by any container. It will also remove all dangling images.
+
+
+
+
+REFERENCES:
+----------
+https://docs.docker.com/get-started/workshop/02_our_app/  >>> Containerize an application
+
+********************************************************************************************************************************************************
+Day 25  - https://www.youtube.com/watch?v=3IAvr_O6vao&list=PLdpzxOOAlwvIKMhk8WhzN1pYoJ1YU8Csa&index=31
+          https://www.google.com/search?q=script+to+create+a+docker+file+with+amazon+linus+base+image+in+EC2+instance&rlz=1C1YTUH_enIN1052IN1052&oq=script+to+create+a+docker+file+with+amazon+linus+base+image+in+EC2+instance&gs_lcrp=EgZjaHJvbWUyBggAEEUYOdIBCTMxMzYwajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:3c08e7a5,vid:oemYIg8IoMA,st:0
+
+Django Install:
+-------------
+
+https://www.djangoproject.com/start/
+https://docs.djangoproject.com/en/5.1/intro/install/
+https://www.youtube.com/watch?v=Uq7TkegTXRU >> Install both python and django
+
+-----------------------------------------------------------------
+
+Intsall Python and Django:
+--------------------------
+
+https://www.youtube.com/watch?v=f5jcNsgl-Sw  >> PYTHON : How do I install Python 3 on an AWS EC2 instance?
+
+https://www.djangoproject.com/download/
+https://www.youtube.com/watch?v=uJmjAIzNekI&list=PLyBiUX9SY9IuCaJtBMWE6jCJxpEgFBje-&index=7  >> Goo
+
+https://www.youtube.com/watch?v=sFS6rIZN4Lg  --> Python pip install -r requirements.txt error: externally managed environment Windows, Linux, MacOS
+
+
+********************************************************************************************************************************************************
+
+
+
