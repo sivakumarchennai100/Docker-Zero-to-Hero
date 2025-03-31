@@ -24,7 +24,7 @@ Example: https://git[hub.com/GoogleContainerTools/distroless/tree/main/]hub.com/
 ###########################################
 # BASE IMAGE
 ###########################################
- 
+
 FROM ubuntu AS build   >>>> Base Image
  
 RUN apt-get update && apt-get install -y golang-go >>> Installing the dependendies, in thi case we are installing golang application
@@ -43,10 +43,14 @@ We need only the python/java/golang runtime to run the application
 With the above Docker file, we have the Ubuntu base image which has lot of dependendies, apt packages, apt repo, which creates a overload on the simple docker calculatr application, since we need only the python/java/golang runtime to run this application
 Inorder to avoid the above overload, docker introduced a concept called multistage docker builds.
 In   multistage docker builds , we split the docker file into two or multiple parts.
+
+DISTROLESS IMAGE DEMO:
 ###########################################
 # BASE IMAGE
 ###########################################
- 
+
+# STAGE 1 
+
 FROM ubuntu AS build
  
 RUN apt-get update && apt-get install -y golang-go
@@ -60,8 +64,8 @@ RUN CGO_ENABLED=0 go build -o /app .
 ############################################
 # HERE STARTS THE MAGIC OF MULTI STAGE BUILD
 ############################################
- 
-FROM scratch
+ # STAGE 2
+FROM scratch   >>>>>>>>>>>>>>>>. Scratch is the minimalistic distroless image we have till date
  
 # Copy the compiled binary from the build stage
 COPY --from=build /app /app
@@ -95,7 +99,21 @@ Building the image with multistage docker build:
  
 [ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker images | head -5
 Now the image created with multistage docker build size will be very minimal
- 
+
+--------------------------------------------------------------------------------------------
+
+DISTROLESS IMAGES:
+-----------------
+
+https://github.com/GoogleContainerTools/distroless
+
+Example: https://github.com/GoogleContainerTools/distroless/tree/main/java  
+
+Advantages:
+- Reduced size
+- Provides high security by not exposing to OS vulenarability
+
+--------------------------------------------------------------------------------------------
  
 ********************************************************************************************************************************************************
  
