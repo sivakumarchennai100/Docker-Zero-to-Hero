@@ -1,24 +1,6 @@
 UNDERSTANDING THE FLOW OF DJANGO APPLICATION CODE:
 ==================================================
 
-Dockerfile:.
-----------
-ubuntu@ip-172-31-42-41:~/Docker-Zero-to-Hero/examples/python-web-app$ more Dockerfile
-FROM ubuntu
-
-WORKDIR /app
-
-COPY requirements.txt /app
-COPY devops /app
-
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    pip install -r requirements.txt --break-system-packages && \
-    cd devops
-
-ENTRYPOINT ["python3"]
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]
-
 *************************************************************************************************************************
 Day 24: Ubuntu Docker Installation: >>> Working one
 --------------------------------------------------
@@ -48,7 +30,7 @@ Verify in Docker hub: https://hub.docker.com/repositories/skmohan7984
 
 
 ********************************************************************************************************************************************************
-
+Refer: https://docs.djangoproject.com/en/5.1/intro/install/
 
 Day 25: Deploy a Django application as a docker container:  -- Working one
 ----------------------------------------------------------
@@ -125,7 +107,8 @@ RUN apt-get update && \
 ENTRYPOINT ["python3"]
 CMD ["manage.py", "runserver", "0.0.0.0:8000"]
 
-
+Note: Django-admin is similar to Ansible Galaxy which provides the skeleton of the ansible role, likewise django-admin
+provide you the skeleton of the project
 
 -----------------------
 
