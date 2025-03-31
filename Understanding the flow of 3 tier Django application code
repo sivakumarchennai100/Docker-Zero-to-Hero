@@ -38,11 +38,11 @@ github: https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main
 
 
 Understanding Django : examples/python-web-app/devops/settings.py                   >> Here we have the configuration for the entire project under settings.py
-                   examples/python-web-app/devops/demo/views.py                     >> Here we have the python code which is executed for rendering the templates.
+                   examples/python-web-app/devops/demo/views.py                     >> Here we have the actual python code which is executed for rendering the templates.
                    examples/python-web-app/devops/demo/templates                    >> Folder for rendering the template
                    examples/python-web-app/devops/demo/templates/demo_site.html     >> This is the content served for browser
                        examples/python-web-app/devops/demo                          >> Here we have one micro services created for the devops project
-                   examples/python-web-app/devops/urls.py                           >> responsible for serving the content for the urls
+                   examples/python-web-app/devops/urls.py                           >> responsible for serving the content for the urls for the demo application
 
 
 Flow of Django applications:
@@ -61,8 +61,8 @@ Flow of Django applications:
                               ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ source demo_env/bin/activate
                               (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$
       - Install Django: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ pip3 install django
-      - Start the django project using django-admin: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ django-admin startproject devops
-                                                     (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops/devops$ django-admin startapp demo
+      - Start the django project using django-admin: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ django-admin startproject devops --> To create a project using django 
+                                                     (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops/devops$ django-admin startapp demo --> To create your application using django
       - Goto settings.py and enter the host ip in ALLOWED_HOSTS ['*']
       - Now run the application : First add the port number 8000 and allowed host in AWS security group of the instance created.
                             (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app/devops$ python manage.py runserver 0.0.0.0:8000  > Now the port will open and run the application inside the container
@@ -70,7 +70,7 @@ Flow of Django applications:
       - Verify the applications: http://34.201.143.16:8000/demo/
 
       - To containerise the application: (demo_env) ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/python-web-app$ docker build .
-      -                                  ubuntu@ip-172-31-43-42:~/Docker-Zero-to-Hero/examples/python-web-app$ docker run -p 8000:8000 -it c5fd646effea
+      -                                  ubuntu@ip-172-31-43-42:~/Docker-Zero-to-Hero/examples/python-web-app$ docker run -p 8000:8000 -it c5fd646effea --> port mapping is done here
 
 >>> Not working after this before
 
@@ -107,8 +107,14 @@ RUN apt-get update && \
 ENTRYPOINT ["python3"]
 CMD ["manage.py", "runserver", "0.0.0.0:8000"]
 
+Note: ENTRYPOINT and CMD can be used to execute as the start command whenever we run the docker run command.
+      ENTRYPOINT cannot be changed/overwrite (ex, executables like python3) , whereas CMD is configurable 
 Note: Django-admin is similar to Ansible Galaxy which provides the skeleton of the ansible role, likewise django-admin
-provide you the skeleton of the project
+provide you the skeleton of the project when we execute the bleow command
+$ django-admin startproject devops
+
+
+
 
 -----------------------
 
