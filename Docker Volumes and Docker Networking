@@ -1,4 +1,4 @@
-### DOCKER VOLUMES AND DOCKER NETWORKING ###
+### MULTISTAGE DOCKER BUILD #### DOCKER VOLUMES & BIND MOUNTS #### DOCKER NETWORKING ###
 
 Day-26 | Multi Stage Docker Builds | Reduce Image Size by 800 % | Distroless Container Images:
 ----------------------------------------------------------------------------------------------------------------------------
@@ -168,29 +168,8 @@ Volume provides high performance when created with high performance and added t 
  
  
  
- 
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 While creating docker volumes better to go with – mount options because it is very verbose to users
  
- 
- 
- 
-
-
 
 Practicals:
 Note, unless there is need, it is always good to go for Volumes.
@@ -353,18 +332,7 @@ Overlay networking is formed when there needs a communications bw multiple hosts
 
 
  
- 
- 
- 
- 
- 
-
-
- 
- 
- 
- 
- 
+  
 Practicals:
  
 Day 28: https://www.youtube.com/watch?v=xrUGEoUpa3s
