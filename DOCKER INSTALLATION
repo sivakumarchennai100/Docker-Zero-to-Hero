@@ -1,0 +1,89 @@
+# Docker-Installation
+
+
+How to install Docker on Linux machine:
+
+#############################################
+- Login to EC2 instance via CLI or ssh to linus server and run the below commands
+
+ubuntu@ip-172-31-18-50:~$ sudo apt update -y
+ubuntu@ip-172-31-34-138:~$ sudo apt install docker.io -y
+ubuntu@ip-172-31-34-138:~$ docker >> veriy for docker installation
+ubuntu@ip-172-31-34-138:~$ sudo systemctl status docker
+
+ubuntu@ip-172-31-34-138:~$ sudo systemctl start docker
+ubuntu@ip-172-31-34-138:~$ sudo usermod -aG docker ubuntu
+ubuntu@ip-172-31-34-138:~$ sudo service docker restart
+ubuntu@ip-172-31-34-138:~$ docker run hello-world >> logout of Ec2 instance / Linux server and login back
+
+ubuntu@ip-172-31-34-138:~$ git clone https://github.com/iam-veeramalla/Docker-Zero-to-Hero
+ubuntu@ip-172-31-34-138:~$ cd /Docker-Zero-to-Hero/examples/python-web-app
+ubuntu@ip-172-31-34-138:~/Docker-Zero-to-Hero/examples/python-web-app$ docker build -t siva7984/my-first-docker-image:latest .
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker images
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker run -it siva7984/my-first-docker-image:latest
+
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker login (UN:xxxxx , pw:xxxx)
+ubuntu@ip-172-31-18-50:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker tag siva7984/my-first-docker-image skmohan7984/my_image_v1
+ubuntu@ip-172-31-31-35:~/Docker-Zero-to-Hero/examples/first-docker-file$ docker push skmohan7984/my_image_v1
+
+
+Verify in Docker hub: https://hub.docker.com/repositories/skmohan7984
+
+
+Note:
+While running the below command, the following error is observed:
+
+$ docker build -t siva7984/my-first-docker-image:latest .
+
+Running hooks in /etc/ca-certificates/update.d...
+done.
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+
+    If you wish to install a non-Debian-packaged Python package,
+    create a virtual environment using python3 -m venv path/to/venv.
+    Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+    sure you have python3-full installed.
+
+    If you wish to install a non-Debian packaged Python application,
+    it may be easiest to use pipx install xyz, which will manage a
+    virtual environment for you. Make sure you have pipx installed.
+
+    See /usr/share/doc/python3.12/README.venv for more information.
+
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+The command '/bin/sh -c apt-get update &&     apt-get install -y python3 python3-pip &&     pip install -r requirements.txt &&     cd devops' returned a non-zero code: 1
+
+
+*******************************************************************
+Solution for the above error:
+
+Open the docker file and modify the line for break-fix
+
+$ vim Dockerfile
+
+FROM ubuntu
+
+WORKDIR /app
+
+COPY requirements.txt /app
+COPY devops /app
+
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt --break-system-packages && \   <<<<<<<<<<<<<<<< update this line
+    cd devops
+
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+
+# Save and Exit
+
+
+
+
