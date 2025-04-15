@@ -5,14 +5,11 @@ You can watch the video version of this youtube playlist. -> https://www.youtube
 
 ## What is a container ?
 
-A container is a standard unit of software that packages up code and all its dependencies so the application runs quickly and reliably from one computing environment to another. A Docker container image is a lightweight, standalone, executable package of software that includes everything needed to run an application: code, runtime, system tools, system libraries and settings.
+- A container is a standard unit of software that packages up code and all its dependencies so the application runs quickly and reliably from one computing environment to another.
+- A Docker container image is a lightweight, standalone, executable package of software that includes everything needed to run an application: code, runtime, system tools, system libraries and settings.
 
-Ok, let me make it easy !!!
-
-A container is a bundle of Application, Application libraries required to run your application and the minimum system dependencies.
-
+- A container is a bundle of Application, Application libraries required to run your application and the minimum system dependencies.
 ![Screenshot 2023-02-07 at 7 18 10 PM](https://user-images.githubusercontent.com/43399466/217262726-7cabcb5b-074d-45cc-950e-84f7119e7162.png)
-
 
 
 ## Containers vs Virtual Machine 
@@ -94,7 +91,10 @@ I hope it is now very clear why containers are light weight in nature.
 
 ### What is Docker ?
 
-Docker is a containerization platform that provides easy way to containerize your applications, which means, using Docker you can build container images, run the images to create containers and also push these containers to container regestries such as DockerHub, Quay.io and so on.
+- Docker and Kubernetes (often abbreviated as K8s) are two powerful tools used in the world of containerization and orchestration
+- Docker is a platform that allows you to automate the deployment, scaling, and management of applications using containerization
+- Docker is a containerization platform that provides easy way to containerize your applications, which means, using Docker you can build container images, run the images 
+  to create containers and also push these containers to container regestries such as DockerHub, Quay.io and so on.
 
 In simple words, you can understand as `containerization is a concept or technology` and `Docker Implements Containerization`.
 
