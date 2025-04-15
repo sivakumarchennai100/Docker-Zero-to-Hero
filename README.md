@@ -405,6 +405,8 @@ c5ff2d88f679: Mounted from library/ubuntu
 latest: digest: sha256:6e49841ad9e720a7baedcd41f9b666fcd7b583151d0763fe78101bb8221b1d88 size: 1157
 ```
 ## To clean the space after installation:
+$ sudo docker images
+$ sudo docker rmi -f django-app-project-v1 skmohan7984/django-app-project-new skmohan7984/django-app-project-v1
 $ sudo docker system prune -a
 
 
