@@ -1,0 +1,107 @@
+## Github repo:   https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main/examples/golang-multi-stage-docker-build
+
+## Comparison of the docker file with and without multi stage docker build:
+
+ubuntu@ip-172-31-92-62:~/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build/dockerfile-without-multistage$ cat Dockerfile 
+###########################################
+# BASE IMAGE
+###########################################
+
+FROM ubuntu AS build
+
+RUN apt-get update && apt-get install -y golang-go
+
+ENV GO111MODULE=off
+
+COPY . .
+
+RUN CGO_ENABLED=0 go build -o /app .
+
+ENTRYPOINT ["/app"]
+
+ubuntu@ip-172-31-92-62:~/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build/dockerfile-without-multistage$ cd ..
+ubuntu@ip-172-31-92-62:~/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build$ ls
+Dockerfile  README.md  calculator.go  dockerfile-without-multistage
+ubuntu@ip-172-31-92-62:~/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build$ cat Dockerfile 
+###########################################
+# BASE IMAGE
+###########################################
+
+FROM ubuntu AS build
+
+RUN apt-get update && apt-get install -y golang-go
+
+ENV GO111MODULE=off
+
+COPY . .
+
+RUN CGO_ENABLED=0 go build -o /app .
+
+############################################
+# HERE STARTS THE MAGIC OF MULTI STAGE BUILD
+############################################
+
+FROM scratch
+
+# Copy the compiled binary from the build stage
+COPY --from=build /app /app
+
+# Set the entrypoint for the container to run the binary
+ENTRYPOINT ["/app"]
+
+ubuntu@ip-172-31-92-62:~/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build$ 
+
+--------------------------------------------------------------------------------------------------------------------------
+
+git clone https://github.com/iam-veeramalla/Docker-Zero-to-Hero/tree/main/examples/golang-multi-stage-docker-build
+
+cd Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build && ls
+
+sudo yum install golang
+
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ go run calculator.go
+
+
+cd /home/ec2-user/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build/dockerfile-without-multistage
+
+--------------------------------------------------------------------------------------------
+
+
+Building the image without multistage docker build:
+
+[ec2-user@ip-172-31-83-217 dockerfile-without-multistage]$ docker build -t simplecalculator .
+
+[ec2-user@ip-172-31-83-217 dockerfile-without-multistage]$ docker images | head -5
+REPOSITORY                          TAG       IMAGE ID       CREATED          SIZE
+simplecalculator                    latest    2dfe4e10dee9   42 seconds ago   666MB
+skmohan7984/my-first-docker-image   latest    43a98e3721dc   4 hours ago      580MB
+hello-world                         latest    d2c94e258dcb   16 months ago    13.3kB
+
+--------------------------------------------------------------------------------------------
+
+
+Building the image with multistage docker build:
+
+/home/ec2-user/Docker-Zero-to-Hero/examples/golang-multi-stage-docker-build/Dockerfile --> multistage docker build
+
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker build -t simplecalculator-multistage .
+
+[ec2-user@ip-172-31-83-217 golang-multi-stage-docker-build]$ docker images | head -5
+REPOSITORY                          TAG       IMAGE ID       CREATED          SIZE
+simplecalculator-multistage         latest    7432c55f3f1c   21 seconds ago   1.96MB
+simplecalculator                    latest    2dfe4e10dee9   6 minutes ago    666MB
+skmohan7984/my-first-docker-image   latest    43a98e3721dc   4 hours ago      580MB
+hello-world                         latest    d2c94e258dcb   16 months ago    13.3kB
+
+--------------------------------------------------------------------------------------------
+- What are the number of stages in multistage docker builds : Ans: countless
+
+DISTROLESS IMAGES:
+-----------------
+
+https://github.com/GoogleContainerTools/distroless
+
+Example: https://github.com/GoogleContainerTools/distroless/tree/main/java  
+
+
+--------------------------------------------------------------------------------------------
