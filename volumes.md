@@ -17,16 +17,16 @@ Scenario1:
 Container --> NGINX installed --> Storage of log files
 Container down --> NGINX down --> Log files deleted.
 
-Scenario2: Frontend Container --> Fetching data from files stored by the backend container <-- Backend Container (Down)
+Scenario2: Frontend Container --> Fetching data from files stored by the backend container <-- Backend Container (Down) --> Then we have the current day data only.
 
-Scenario3: App container --> Fetching the file that is provided from the cron job on the host >> Container cannot access the file from the host directories, it can only access the resources.
+Scenario3: App container --> Need to Fetch the file that is provided from the cron job on the host >> Container cannot access the file from the host directories, it can only access the resources.
 
 For the above scenarios , docker offers 2 solutions
 
 1. Bind mounts >> Allow to bind a directory on the host with the folder inside a container
 2. Volumes >> Same as Bind mounts with better lifecycles
               Using Docker cli >> create/remove/move volumes >>
-              Binding the folder bw Container and any hosts can be done with volumes
+              Binding the folder bw Container and any hosts can be done with volumes (EC2, S3, NFS etc.,)
               High performance
 ---------------------------------------------------------
 
@@ -161,7 +161,7 @@ local     siva
 local     siva1
 
 
-[ec2-user@ip-172-31-83-217 first-docker-file]$ docker run -d --mount source=siva,target=/app nginx:latest      <<<<<<<<<<<<<
+[ec2-user@ip-172-31-83-217 first-docker-file]$ docker run -d --mount source=siva,target=/app nginx:latest      <<<<<<<<<<<<< To mount the volumes in addintion to build the container, ie. it will have a additional volumes , Verify with the below commands
 Unable to find image 'nginx:latest' locally
 latest: Pulling from library/nginx
 e4fff0779e6d: Pull complete
