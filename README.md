@@ -1,3 +1,29 @@
+## INTRODUCTION:
+
+  Eventhough multiple VM's has been created on one physical machine to use the resources efficiently,
+  Still the resource are not used efficiently because resource allocated to each VM's are static and not elastic between the VM's , ie., not sharing the resurces between 
+  the VM's . Inorder to solve the problem of resources running out of capactiy, and to use the existing resources efficiently, Containers are used.
+  But VMS's are more secured than the containers because VM's have full OS and Containers dont have full OS but they are logically seperated.
+  Containers are "light weight" in nature b/c they dont have a complete OS, they use the base OS running on the VM/EC2 instances
+  For example if the VM/EC2 instance is using the Linux OS, then if the containers requires any libraries or dependecies, they they will share the resources from the VM/EC2
+  Containers will have a minimal OS or the base image.
+  Container is a bundle or package which is a combination of Base Image | Application + Application Libraries + System dependencies.
+  Size of the container snapshot will be very less compared to the VM's snapshots
+  Containers are created in two way, 1. On Physical machines, 2. On Virtual machine
+  1. On Physical machines: IBM/HP server --> OS --> Docker --> Multiple Containers.
+  2. On Virtual machines: IBM/HP server/AWS --> VM/EC2 --> Docker --> Multiple containers (Mostly used in Prod)
+
+- Docker is containerisation platform, came up with the community to improve the containerisation platform, created lot of commands like user interface.
+  To create a container Docker came up with
+  --> Write a docker file (just like jenkin or anyother script files ) --> submit to docker platform / Docker engine usig some docker commads
+      Docker engine will then convert the commands into Docker image
+      Again using some docker commands we can convert the Docker image into containers
+      ie., Commands --> Docker file --> Docker Engine (build) --> Docker Image -->(run) Containers.
+
+- Docker Engine is Single point of failure, when the docker engine is down all the container are down.
+  Inorder to solve the SPOF and other issue, Buildah developed a tool for Docker using shell script and it also builds a docker images
+
+  
 # Repo to learn Docker with examples.
 
 You can watch the video version of this youtube playlist. -> https://www.youtube.com/watch?v=7JZP345yVjw&list=PLdpzxOOAlwvLjb0vTD9BXLOwwLD_GWCmC
