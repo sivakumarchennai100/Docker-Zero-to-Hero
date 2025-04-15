@@ -96,12 +96,15 @@ hello-world                         latest    d2c94e258dcb   16 months ago    13
 --------------------------------------------------------------------------------------------
 - What are the number of stages in multistage docker builds : Ans: countless
 
+
 DISTROLESS IMAGES:
 -----------------
-
-https://github.com/GoogleContainerTools/distroless
-
+Reference: https://github.com/GoogleContainerTools/distroless
 Example: https://github.com/GoogleContainerTools/distroless/tree/main/java  
+
+- Main advantage of distroless image is security, like reduced container size, 99% no vulenerabiltiy since it has only python runtime.
+- Scratch is the minimalistic distroless image available now
+- If we need to use Scratch as distroless image we need to install python 
 
 
 --------------------------------------------------------------------------------------------
